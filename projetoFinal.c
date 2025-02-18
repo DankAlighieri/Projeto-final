@@ -1,3 +1,10 @@
+/*
+    TO-DOs
+
+    1. Implementar a funcionalidade de imprimir diversos caracters no display (scroll right)
+    2. Implementar o wrap quando os caracteres atingirem o limite do display
+*/
+
 #include <stdio.h>
 #include <string.h>
 #include "pico/stdlib.h"
