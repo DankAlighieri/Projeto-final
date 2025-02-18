@@ -39,9 +39,12 @@ bool debounce(uint32_t *last_time);
 uint find_char(char* code);
 
 // Variaveis globais
+
+// Matriz de leds
 PIO pio;
 uint sm;
 
+// Display
 uint8_t ssd[ssd1306_buffer_length];
 struct render_area frame_area = {
     start_column : 0,
@@ -50,19 +53,28 @@ struct render_area frame_area = {
     end_page : ssd1306_n_pages - 1
 };
 
+// PWM dos leds
 uint slice_r;
 uint slice_g;
 
+// Controle dos botoes
 static uint32_t last_time = 0;
 static volatile uint32_t last_press = 0;
 
+// Desenhos para a matriz
 extern Matriz_leds_config* numeros[];
 extern Matriz_leds_config* letras[];
 
+// Estados dos leds
 static volatile bool led_r_state = false;
 static volatile bool led_g_state = false;
 
+// Codigo morse
 char code[10] = "";
+
+// Variaveis para controlar a posicao dos caracteres no display
+uint x = 0;
+uint y = 0;
 
 // Funcao principal
 int main() {
@@ -96,17 +108,30 @@ int main() {
             if(ind > 25){
                 ind = ind - 26;
                 printf("Imprimindo numero %d\n", ind);
-                ssd1306_draw_char(ssd, 10, 10, ind + 48);
+                ssd1306_draw_char(ssd, x, y, ind + 48);
                 imprimir_desenho(*numeros[ind], pio, sm);
             } else {
                 printf("Imprimindo letra %c\n", ind + 65);
-                ssd1306_draw_char(ssd, 10, 10, ind + 65);
+                ssd1306_draw_char(ssd, x, y, ind + 65);
                 imprimir_desenho(*letras[ind], pio, sm);
             }
             render_on_display(ssd, &frame_area);
+            x += 8;
+        }
+
+        if (x >= 128) {
+            x = 0;
+            y += 8;
+        }
+
+        if (y >= 64) {
+            y = 0;
+            x = 0;
+            memset(ssd, 0, ssd1306_buffer_length);
+            render_on_display(ssd, &frame_area);
         }
         
-        sleep_ms(100);
+        sleep_ms(10);
     }
 }
 
@@ -173,11 +198,8 @@ void button_callback(uint gpio, uint32_t events) {
             led_g_state = true;
             strcat(code, "-");
         } else {
-            // Reiniciando o programa caso o botao do joystick seja pressionado
-            memset(ssd, 0, ssd1306_buffer_length);
-            render_on_display(ssd, &frame_area);
-            limpar_matriz(pio, sm);
-            code[0] = '\0';
+            // Espaço entre as letras
+            x += 8;
         }
     }
 }
