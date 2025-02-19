@@ -24,6 +24,8 @@
 #define DISPLAY_SCL 15
 #define CLK_DIV 16.0
 #define BUZZER_FREQ 1000
+#define DURATION1 100
+#define DURATION2 300
 
 // Protótipos
 void init();
@@ -71,8 +73,6 @@ char code[10] = "";
 // Variaveis para controlar a posicao dos caracteres no display
 uint x = 0;
 uint y = 0;
-
-uint16_t duration = 0;
 
 // Funcao principal
 int main() {
@@ -190,8 +190,7 @@ uint find_char(char* code) {
 void handle_leds() {
     if (led_r_state) {
         pwm_set_gpio_level(LED_R, 6559.6); // Duty cycle 10%
-        duration = 100;
-        buzz(BUZZER_PIN, BUZZER_FREQ, duration);
+        buzz(BUZZER_PIN, BUZZER_FREQ, DURATION1);
         led_r_state = false;
     } else {
         pwm_set_gpio_level(LED_R, 0);
@@ -199,8 +198,7 @@ void handle_leds() {
 
     if (led_g_state) {
         pwm_set_gpio_level(LED_G, 6559.6); // Duty cycle 10%
-        duration = 300;
-        buzz(BUZZER_PIN, BUZZER_FREQ, duration);
+        buzz(BUZZER_PIN, BUZZER_FREQ, DURATION2);
         led_g_state = false;
     } else {
         pwm_set_gpio_level(LED_G, 0);
