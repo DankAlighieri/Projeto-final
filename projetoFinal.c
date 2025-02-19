@@ -35,6 +35,12 @@ bool debounce(uint32_t *last_time);
 uint find_char(char* code);
 void handle_leds();
 void handle_display(uint ind);
+void draw_cursor(uint x0, uint y0, bool set);
+void routine_selection();
+// Morse para latino
+void first_routine(uint ind);
+// Latino para Morse
+void second_routine();
 
 // Variaveis globais
 
@@ -74,22 +80,28 @@ char code[10] = "";
 uint x = 0;
 uint y = 0;
 
+typedef enum {
+    FIRST_ROUTINE,
+    SECOND_ROUTINE
+} Routine;
+
+// Variavel para selecionar qual rotina executar
+static volatile Routine current_routine = FIRST_ROUTINE;
+
+static volatile bool button_select_routine = false;
+
 // Funcao principal
 int main() {
     init();
     uint ind = -1;
 
     while (true) {
-        absolute_time_t curr_time = get_absolute_time();
-        // Verificando se o código morse foi digitado
-        if(absolute_time_diff_us(last_press, curr_time) > 1000000) {
-            ind = find_char(code);
-        }
-
-        handle_leds();
-
-        if (ind != -1) {
-            handle_display(ind);
+        //draw_cursor(0, 0, true);
+        routine_selection();
+        if(current_routine == FIRST_ROUTINE) {
+            first_routine(ind);
+        } else {
+            second_routine();
         }
         
         sleep_ms(10);
@@ -149,6 +161,7 @@ uint setup_pwm(uint pin){
     return slice_num;
 }
 
+// Modificar para verificar 
 void button_callback(uint gpio, uint32_t events) {
     if(debounce(&last_time)) {
         last_press = get_absolute_time();
@@ -230,4 +243,37 @@ void handle_display(uint ind) {
         memset(ssd, 0, ssd1306_buffer_length);
         render_on_display(ssd, &frame_area);
     }
+}
+
+/*
+void draw_cursor(uint x0, uint y0, bool set) {
+    ssd1306_draw_line(ssd, x0, y0 + 8, x0 + 8, y0 + 8, set);
+    ssd1306_draw_line(ssd, x0 + 8, y0 + 8, x0 + 4, y0, set);
+    ssd1306_draw_line(ssd, x0, y0 + 8, x0 + 4, y0, set);
+    render_on_display(ssd, &frame_area);
+}
+*/
+void routine_selection() {
+    while(!button_select_routine) {
+        ssd1306_draw_string(ssd, 0, 0, "Escolha a rotina:");
+        ssd1306_draw_string(ssd, 0, 19, "A Morse p Latino");
+        ssd1306_draw_string(ssd, 0, 39, "B Latino p Morse");
+        render_on_display(ssd, &frame_area);
+    }
+}
+
+void first_routine(uint ind){
+    absolute_time_t curr_time = get_absolute_time();
+    // Verificando se o código morse foi digitado
+    if(absolute_time_diff_us(last_press, curr_time) > 1000000) {
+        ind = find_char(code);
+    }
+    handle_leds();
+    if (ind != -1) {
+        handle_display(ind);
+    }
+}
+
+void second_routine() {
+    // A implementar
 }
