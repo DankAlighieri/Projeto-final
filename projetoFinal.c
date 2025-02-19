@@ -1,10 +1,3 @@
-/*
-    TO-DOs
-
-    1. Implementar a funcionalidade de imprimir diversos caracters no display (scroll right)
-    2. Implementar o wrap quando os caracteres atingirem o limite do display
-*/
-
 #include <stdio.h>
 #include <string.h>
 #include "pico/stdlib.h"
@@ -30,6 +23,7 @@
 #define DISPLAY_SDA 14
 #define DISPLAY_SCL 15
 #define CLK_DIV 16.0
+#define BUZZER_FREQ 1000
 
 // Protótipos
 void init();
@@ -37,6 +31,8 @@ uint setup_pwm(uint pin);
 void button_callback(uint gpio, uint32_t events);
 bool debounce(uint32_t *last_time);
 uint find_char(char* code);
+void handle_leds();
+void handle_display(uint ind);
 
 // Variaveis globais
 
@@ -76,6 +72,8 @@ char code[10] = "";
 uint x = 0;
 uint y = 0;
 
+uint16_t duration = 0;
+
 // Funcao principal
 int main() {
     init();
@@ -88,47 +86,10 @@ int main() {
             ind = find_char(code);
         }
 
-        if(led_r_state) {
-            pwm_set_gpio_level(LED_R, 6559.6); // Duty cycle 10%
-            sleep_ms(100);
-            led_r_state = false;
-        } else {
-            pwm_set_gpio_level(LED_R, 0);
-        }
-
-        if(led_g_state) {
-            pwm_set_gpio_level(LED_G, 6559.6); // Duty cycle 10%
-            sleep_ms(200);
-            led_g_state = false;
-        } else {
-            pwm_set_gpio_level(LED_G, 0);
-        }
+        handle_leds();
 
         if (ind != -1) {
-            if(ind > 25){
-                ind = ind - 26;
-                printf("Imprimindo numero %d\n", ind);
-                ssd1306_draw_char(ssd, x, y, ind + 48);
-                imprimir_desenho(*numeros[ind], pio, sm);
-            } else {
-                printf("Imprimindo letra %c\n", ind + 65);
-                ssd1306_draw_char(ssd, x, y, ind + 65);
-                imprimir_desenho(*letras[ind], pio, sm);
-            }
-            render_on_display(ssd, &frame_area);
-            x += 8;
-        }
-
-        if (x >= 128) {
-            x = 0;
-            y += 8;
-        }
-
-        if (y >= 64) {
-            y = 0;
-            x = 0;
-            memset(ssd, 0, ssd1306_buffer_length);
-            render_on_display(ssd, &frame_area);
+            handle_display(ind);
         }
         
         sleep_ms(10);
@@ -223,5 +184,52 @@ uint find_char(char* code) {
             code[0] = '\0';
             return i;
         }
+    }
+}
+
+void handle_leds() {
+    if (led_r_state) {
+        pwm_set_gpio_level(LED_R, 6559.6); // Duty cycle 10%
+        duration = 100;
+        buzz(BUZZER_PIN, BUZZER_FREQ, duration);
+        led_r_state = false;
+    } else {
+        pwm_set_gpio_level(LED_R, 0);
+    }
+
+    if (led_g_state) {
+        pwm_set_gpio_level(LED_G, 6559.6); // Duty cycle 10%
+        duration = 300;
+        buzz(BUZZER_PIN, BUZZER_FREQ, duration);
+        led_g_state = false;
+    } else {
+        pwm_set_gpio_level(LED_G, 0);
+    }
+}
+
+void handle_display(uint ind) {
+    if (ind > 25) {
+        ind = ind - 26;
+        printf("Imprimindo numero %d\n", ind);
+        ssd1306_draw_char(ssd, x, y, ind + 48);
+        imprimir_desenho(*numeros[ind], pio, sm);
+    } else {
+        printf("Imprimindo letra %c\n", ind + 65);
+        ssd1306_draw_char(ssd, x, y, ind + 65);
+        imprimir_desenho(*letras[ind], pio, sm);
+    }
+    render_on_display(ssd, &frame_area);
+    x += 8;
+
+    if (x >= 128) {
+        x = 0;
+        y += 8;
+    }
+
+    if (y >= 64) {
+        y = 0;
+        x = 0;
+        memset(ssd, 0, ssd1306_buffer_length);
+        render_on_display(ssd, &frame_area);
     }
 }
