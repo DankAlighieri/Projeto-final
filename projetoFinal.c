@@ -34,13 +34,15 @@ void button_callback(uint gpio, uint32_t events);
 bool debounce(uint32_t *last_time);
 uint find_char(char* code);
 void handle_leds();
-void handle_display(uint ind);
+void handle_display();
+/*
 void draw_cursor(uint x0, uint y0, bool set);
 void routine_selection();
 // Morse para latino
 void first_routine(uint ind);
 // Latino para Morse
 void second_routine();
+*/
 
 // Variaveis globais
 
@@ -79,29 +81,21 @@ char code[10] = "";
 // Variaveis para controlar a posicao dos caracteres no display
 uint x = 0;
 uint y = 0;
-
-typedef enum {
-    FIRST_ROUTINE,
-    SECOND_ROUTINE
-} Routine;
-
-// Variavel para selecionar qual rotina executar
-static volatile Routine current_routine = FIRST_ROUTINE;
-
-static volatile bool button_select_routine = false;
+uint ind = -1;
 
 // Funcao principal
 int main() {
     init();
-    uint ind = -1;
 
     while (true) {
-        //draw_cursor(0, 0, true);
-        routine_selection();
-        if(current_routine == FIRST_ROUTINE) {
-            first_routine(ind);
-        } else {
-            second_routine();
+        absolute_time_t curr_time = get_absolute_time();
+        // Verificando se o código morse foi digitado
+        if(absolute_time_diff_us(last_press, curr_time) > 1000000) {
+            ind = find_char(code);
+        }
+        handle_leds();
+        if (ind != -1) {
+            handle_display();
         }
         
         sleep_ms(10);
@@ -189,15 +183,13 @@ bool debounce(uint32_t *last_time) {
 }
 
 uint find_char(char* code) {
-    if(code[0] == '\0') {
-        return -1;
-    }
     for(int i = 0; i < 36; i++) {
         if(strcmp(code, morseCode[i]) == 0) {
             code[0] = '\0';
             return i;
         }
     }
+    return -1;
 }
 
 void handle_leds() {
@@ -218,7 +210,7 @@ void handle_leds() {
     }
 }
 
-void handle_display(uint ind) {
+void handle_display() {
     if (ind > 25) {
         ind = ind - 26;
         printf("Imprimindo numero %d\n", ind);
@@ -253,27 +245,3 @@ void draw_cursor(uint x0, uint y0, bool set) {
     render_on_display(ssd, &frame_area);
 }
 */
-void routine_selection() {
-    while(!button_select_routine) {
-        ssd1306_draw_string(ssd, 0, 0, "Escolha a rotina:");
-        ssd1306_draw_string(ssd, 0, 19, "A Morse p Latino");
-        ssd1306_draw_string(ssd, 0, 39, "B Latino p Morse");
-        render_on_display(ssd, &frame_area);
-    }
-}
-
-void first_routine(uint ind){
-    absolute_time_t curr_time = get_absolute_time();
-    // Verificando se o código morse foi digitado
-    if(absolute_time_diff_us(last_press, curr_time) > 1000000) {
-        ind = find_char(code);
-    }
-    handle_leds();
-    if (ind != -1) {
-        handle_display(ind);
-    }
-}
-
-void second_routine() {
-    // A implementar
-}
