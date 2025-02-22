@@ -161,10 +161,15 @@
     { "type": "wokwi-gnd", "id": "gnd3", "top": 86.4, "left": -96.6, "attrs": {} },
     { "type": "wokwi-gnd", "id": "gnd4", "top": 163.2, "left": -135, "attrs": {} },
     { "type": "wokwi-gnd", "id": "gnd5", "top": 201.6, "left": -135, "attrs": {} },
-    { "type": "wokwi-gnd", "id": "gnd6", "top": -19.2, "left": -125.4, "attrs": {} },
-    { "type": "wokwi-gnd", "id": "gnd7", "top": -76.8, "left": -125.4, "attrs": {} },
-    { "type": "wokwi-vcc", "id": "vcc2", "top": -91.4, "left": -43.96, "rotate": 90, "attrs": {} },
-    { "type": "wokwi-vcc", "id": "vcc3", "top": -33.8, "left": -43.96, "rotate": 90, "attrs": {} },
+    { "type": "wokwi-gnd", "id": "gnd6", "top": -56.7, "left": -39.5, "rotate": 270, "attrs": {} },
+    {
+      "type": "wokwi-gnd",
+      "id": "gnd7",
+      "top": -114.3,
+      "left": -39.5,
+      "rotate": 270,
+      "attrs": {}
+    },
     { "type": "wokwi-vcc", "id": "vcc4", "top": 87.16, "left": 182.4, "attrs": {} }
   ],
   "connections": [
@@ -172,8 +177,7 @@
     [ "pico:GP1", "$serialMonitor:TX", "", [] ],
     [ "pico:GP11", "led2:A", "green", [ "v-3.25", "h-25.25", "v19.2" ] ],
     [ "pico:GP13", "led1:A", "green", [ "h-25.25", "v35.19" ] ],
-    [ "pico:GP10", "bz1:2", "green", [ "h-25.25", "v-51.25" ] ],
-    [ "pico:GP5", "btn1:2.r", "green", [ "h-25.25", "v-80.05", "h-29" ] ],
+    [ "pico:GP10", "bz1:2", "green", [ "h-34.85", "v-51.25" ] ],
     [ "rgb25:DOUT", "rgb24:DIN", "green", [ "h-9.6", "v-10.5" ] ],
     [ "rgb23:DIN", "rgb24:DOUT", "green", [ "h18.4", "v9.6" ] ],
     [ "rgb23:DOUT", "rgb22:DIN", "green", [ "h-9.6", "v-10.5" ] ],
@@ -247,14 +251,15 @@
     [ "rgb3:VSS", "rgb2:VSS", "black", [ "v8.7", "h-48.8" ] ],
     [ "rgb2:VSS", "rgb1:VSS", "black", [ "v8.7", "h-48.8" ] ],
     [ "pico:GP7", "rgb25:DIN", "green", [ "h-150.05", "v44.75" ] ],
-    [ "pico:GP6", "vcc2:VCC", "green", [ "h-15.65", "v-147.25", "h-38.4" ] ],
     [
       "pico:GP14",
       "oled1:SDA",
       "green",
       [ "h-15.65", "v35.19", "h144", "v-153.6", "h67.2", "v0", "h9.6" ]
     ],
-    [ "pico:GP15", "oled1:SCL", "green", [ "h-6.05", "v15.99", "h124.8", "v-134.4", "h76.8" ] ]
+    [ "pico:GP15", "oled1:SCL", "green", [ "h-6.05", "v15.99", "h124.8", "v-134.4", "h76.8" ] ],
+    [ "btn1:2.r", "pico:GP6", "green", [ "h29", "v109.05" ] ],
+    [ "pico:GP5", "btn2:2.r", "green", [ "h-15.65", "v-3.25" ] ]
   ],
   "dependencies": {}
 }
